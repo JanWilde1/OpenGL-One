@@ -17,6 +17,9 @@ Window::Window(int w, int h, const char* t) : width(w), height(h), title(t) {
 
     glfwMakeContextCurrent(instance);
     glViewport(0, 0, width, height);
+
+    glfwSetWindowUserPointer(instance, this);
+    glfwSetFramebufferSizeCallback(instance, framebufferSizeCallback);
 }
 
 Window::~Window() {
@@ -24,14 +27,11 @@ Window::~Window() {
     glfwTerminate();
 }
 
-void Window::setClearColor(float r, float g, float b, float a) {
-    clearColor[0] = r;
-    clearColor[1] = g;
-    clearColor[2] = b;
-    clearColor[3] = a;
-}
+void Window::framebufferSizeCallback(GLFWwindow* window, int w, int h) {
+    
+    Window* windowPtr = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
-void Window::clear() {
-    glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    windowPtr->width = w;
+    windowPtr->height = h;
+    glViewport(0, 0, w, h);
 }

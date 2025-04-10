@@ -17,7 +17,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 file(GLOB_RECURSE SOURCES "src/**.cpp")
 file(GLOB_RECURSE HEADERS "include/**.h")
-file(GLOB_RECURSE SHADERS "shaders/*.vert" "shaders/*.frag")
+file(GLOB_RECURSE SHADERS "shaders/**.vert" "shaders/**.frag")
 
 add_executable(OpenGL ${SOURCES} ${HEADERS} ${SHADERS})
 

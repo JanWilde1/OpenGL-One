@@ -1,20 +1,19 @@
 #include "Application/Application.h"
+#include "Renderer/Renderer.h"
 
 #include <iostream>
+#include <vector>
 
 Application::Application()
 {
     init();
 
     if (window) { 
-        window->setClearColor(0.2f, 0.3f, 0.0f, 1.0f);
-
         while (!glfwWindowShouldClose(window->instance))
         {
             update();
             render();
-
-            glfwSwapBuffers(window->instance);
+            
             glfwPollEvents();
         }
     }
@@ -31,6 +30,10 @@ void Application::init()
     }
 
     window = new Window(800, 800, "OpenGL Application");
+
+    renderer = new Renderer(*window);
+
+    renderer->setClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     if (!window || !window->instance)
     {
@@ -59,7 +62,9 @@ void Application::update()
 
 void Application::render()
 {
-    window->clear();
+    std::vector<RenderObject> objects;
+
+    renderer->renderFrame(objects);
 }
 
 void Application::cleanup()

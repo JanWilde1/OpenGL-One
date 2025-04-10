@@ -3,8 +3,11 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+class Renderer;
+
 struct Window {
     GLFWwindow* instance;
+
     int width;
     int height;
     const char* title;
@@ -14,7 +17,5 @@ struct Window {
 
     ~Window();
 
-    void setClearColor(float r, float g, float b, float a);
-
-    void clear();
+    static void framebufferSizeCallback(GLFWwindow* window, int w, int h);
 };

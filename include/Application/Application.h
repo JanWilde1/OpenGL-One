@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Renderer/Window.h"
+#include "Renderer/Renderer.h"
 
 class Application
 {
@@ -17,4 +18,5 @@ public:
 
 private:
     Window* window;
+    Renderer* renderer;
 };
