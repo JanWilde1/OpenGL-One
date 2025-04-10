@@ -4,4 +4,7 @@
 
 int main() {
     Application app;
+
+    glfwTerminate();
+    return 0;
 }

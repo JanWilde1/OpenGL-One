@@ -13,7 +13,7 @@ Application::Application()
         {
             update();
             render();
-            
+
             glfwPollEvents();
         }
     }
@@ -28,13 +28,14 @@ void Application::init()
         std::cerr << "Failed to Init GLFW" << std::endl;
         return;
     }
+    
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     window = new Window(800, 800, "OpenGL Application");
-
-    renderer = new Renderer(*window);
-
-    renderer->setClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-
+    
     if (!window || !window->instance)
     {
         std::cerr << "Failed to Create Window" << std::endl;
@@ -43,16 +44,17 @@ void Application::init()
     }
     
     glfwMakeContextCurrent(window->instance);
-
+    
+    // Initialize GLEW here
     GLenum err = glewInit();
-
     if (err != GLEW_OK)
     {
         std::cerr << "Failed to Init GLEW: " << glewGetErrorString(err) << std::endl;
         return;
     }
 
-    glViewport(0, 0, window->width, window->height);
+    renderer = new Renderer(*window);
+    renderer->setClearColor(0.5f, 0.1f, 0.1f, 1.0f);
 }
 
 void Application::update()
@@ -71,6 +73,9 @@ void Application::cleanup()
 {
     delete window;
     window = nullptr;
+
+    delete renderer;
+    renderer = nullptr;
 
     glfwTerminate();
 }
