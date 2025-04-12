@@ -37,11 +37,13 @@ private:
     bool checkProgramLinkErrors(GLuint program);
 
     Window& m_window;
-    GLFWwindow* m_glfwWindowHandle;
+    GLFWwindow* m_glfwWindowHandle; //Sort
 
     GLuint m_shaderProgramID;
     GLuint m_vertexArrayID;
     GLuint m_vertexBufferID;
+
+    GLuint m_textureID;
 
     glm::vec4 m_clearColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 };

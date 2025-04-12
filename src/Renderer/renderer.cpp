@@ -1,5 +1,8 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "Renderer/Renderer.h"
 #include "Renderer/Window.h"
+#include "Vendor/stb_image.h"
 
 #include <iostream>
 #include <fstream>
@@ -23,10 +26,54 @@ bool Renderer::init()
     m_shaderProgramID = loadShaders("../shaders/simple.vert", "../shaders/simple.frag");
 
     GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
+        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 0.0f,       0.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f,      0.0f, 0.0f, 0.0f,       0.0f, 1.0f,
+        0.5f, -0.5f, 0.0f,      0.0f, 0.0f, 0.0f,       1.0f, 0.0f,
+        0.5f, -0.5f, 0.0f,      0.0f, 0.0f, 0.0f,       1.0f, 0.0f,
+        0.5f, 0.5f, 0.0f,       0.0f, 0.0f, 0.0f,       1.0f, 1.0f,
+        -0.5f, 0.5f, 0.0f,      0.0f, 0.0f, 0.0f,       0.0f, 1.0f
     };
+
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    stbi_set_flip_vertically_on_load(true);
+
+    int width, height, channels;
+    unsigned char* image = stbi_load("../textures/tex1.png", &width, &height, &channels, 0);
+
+    if (image)
+    {
+        GLenum format;
+        if (channels == 3)
+            format = GL_RGB;
+        else if (channels == 4)
+            format = GL_RGBA;
+        else {
+            std::cerr << "Unexpected number of channels: " << channels << std::endl;
+            format = GL_RGB;
+        }
+        
+        std::cout << "Loaded texture: " << width << "x" << height << " with " << channels << " channels" << std::endl;
+        
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, image);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        
+        // Store texture ID
+        m_textureID = texture;
+    }
+    else
+    {
+        std::cerr << "Failed to load texture" << std::endl;
+    }
+
+    stbi_image_free(image);
     
     glGenVertexArrays(1, &m_vertexArrayID);
     glBindVertexArray(m_vertexArrayID);
@@ -35,8 +82,15 @@ bool Renderer::init()
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferID);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0); // Coordinates
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))); // Colour
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat))); // Texture
+    glEnableVertexAttribArray(2);
+    
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     return true;
@@ -58,6 +112,11 @@ void Renderer::shutdown()
         glDeleteProgram(m_shaderProgramID);
         m_shaderProgramID = 0;
     }
+    
+    if (m_textureID) {
+        glDeleteTextures(1, &m_textureID);
+        m_textureID = 0;
+    }
 }
 
 void Renderer::renderFrame(std::vector<RenderObject>& objects)
@@ -66,9 +125,20 @@ void Renderer::renderFrame(std::vector<RenderObject>& objects)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     glUseProgram(m_shaderProgramID);
+    
+    // Activate and bind texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_textureID);
+    
+    // Set uniform if your shader uses a sampler
+    // If your fragment shader has: uniform sampler2D textureSampler;
+    GLint texLocation = glGetUniformLocation(m_shaderProgramID, "textureSampler");
+    if (texLocation != -1) {
+        glUniform1i(texLocation, 0);
+    }
+    
     glBindVertexArray(m_vertexArrayID);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     for (const auto& object : objects)
     {
