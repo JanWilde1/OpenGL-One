@@ -4,9 +4,15 @@
 #include "Renderer/Window.h"
 #include "Vendor/stb_image.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+
+float rotation = 0;
 
 Renderer::Renderer(Window& window)
     : m_window(window), m_glfwWindowHandle(window.instance)
@@ -125,7 +131,24 @@ void Renderer::renderFrame(std::vector<RenderObject>& objects)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     glUseProgram(m_shaderProgramID);
-    
+
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(55.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+
+    glm::mat4 view = glm::mat4(1.0f);
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -(float)glfwGetTime()));
+
+    glm::mat4 projection;
+    projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
+
+    unsigned int modelShaderLocation = glGetUniformLocation(m_shaderProgramID, "model");
+    unsigned int viewShaderLocation = glGetUniformLocation(m_shaderProgramID, "view");
+    unsigned int projectionShaderLocation = glGetUniformLocation(m_shaderProgramID, "projection");
+
+    glUniformMatrix4fv(modelShaderLocation, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewShaderLocation, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projectionShaderLocation, 1, GL_FALSE, glm::value_ptr(projection));
+
     // Activate and bind texture
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_textureID);
