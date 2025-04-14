@@ -14,11 +14,23 @@
 
 float rotation = 0;
 
-Renderer::Renderer(Window& window)
-    : m_window(window), m_glfwWindowHandle(window.instance)
+const glm::vec3 cubePositions[] = {
+    glm::vec3( 0.0f,  0.0f,  0.0f), 
+    glm::vec3( 2.0f,  5.0f, -15.0f), 
+    glm::vec3(-1.5f, -2.2f, -2.5f),  
+    glm::vec3(-3.8f, -2.0f, -12.3f),  
+    glm::vec3( 2.4f, -0.4f, -3.5f),  
+    glm::vec3(-1.7f,  3.0f, -7.5f),  
+    glm::vec3( 1.3f, -2.0f, -2.5f),  
+    glm::vec3( 1.5f,  2.0f, -2.5f), 
+    glm::vec3( 1.5f,  0.2f, -1.5f), 
+    glm::vec3(-1.3f,  1.0f, -1.5f)  
+};
+
+Renderer::Renderer()
 {
     std::cout << "Renderer constructor called" << std::endl;
-    init();
+    initTriangle();
 }
 
 Renderer::~Renderer()
@@ -27,17 +39,58 @@ Renderer::~Renderer()
     shutdown();
 }
 
-bool Renderer::init()
+bool Renderer::initTriangle()
 {
     m_shaderProgramID = loadShaders("../shaders/simple.vert", "../shaders/simple.frag");
 
     GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 0.0f,       0.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f,      0.0f, 0.0f, 0.0f,       0.0f, 1.0f,
-        0.5f, -0.5f, 0.0f,      0.0f, 0.0f, 0.0f,       1.0f, 0.0f,
-        0.5f, -0.5f, 0.0f,      0.0f, 0.0f, 0.0f,       1.0f, 0.0f,
-        0.5f, 0.5f, 0.0f,       0.0f, 0.0f, 0.0f,       1.0f, 1.0f,
-        -0.5f, 0.5f, 0.0f,      0.0f, 0.0f, 0.0f,       0.0f, 1.0f
+        // Front face (positive Z)
+        -0.5f, -0.5f, 0.5f,   0.0f, 0.0f,
+         0.5f, -0.5f, 0.5f,   1.0f, 0.0f,
+         0.5f,  0.5f, 0.5f,   1.0f, 1.0f,
+         0.5f,  0.5f, 0.5f,   1.0f, 1.0f,
+        -0.5f,  0.5f, 0.5f,   0.0f, 1.0f,
+        -0.5f, -0.5f, 0.5f,   0.0f, 0.0f,
+
+        // Back face (negative Z)
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        // Right face (positive X)
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        // Left face (negative X)
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        // Top face (positive Y)
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+
+        // Bottom face (negative Y)
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f
     };
 
     unsigned int texture;
@@ -88,14 +141,11 @@ bool Renderer::init()
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferID);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0); // Coordinates
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0); // Coordinates
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))); // Colour
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))); // Texture
     glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat))); // Texture
-    glEnableVertexAttribArray(2);
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -128,12 +178,10 @@ void Renderer::shutdown()
 void Renderer::renderFrame(std::vector<RenderObject>& objects)
 {
     glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
+    glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     glUseProgram(m_shaderProgramID);
-
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(55.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
 
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -(float)glfwGetTime()));
@@ -141,11 +189,10 @@ void Renderer::renderFrame(std::vector<RenderObject>& objects)
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
 
-    unsigned int modelShaderLocation = glGetUniformLocation(m_shaderProgramID, "model");
     unsigned int viewShaderLocation = glGetUniformLocation(m_shaderProgramID, "view");
     unsigned int projectionShaderLocation = glGetUniformLocation(m_shaderProgramID, "projection");
+    unsigned int modelShaderLocation = glGetUniformLocation(m_shaderProgramID, "model");
 
-    glUniformMatrix4fv(modelShaderLocation, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewShaderLocation, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projectionShaderLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -159,19 +206,24 @@ void Renderer::renderFrame(std::vector<RenderObject>& objects)
     if (texLocation != -1) {
         glUniform1i(texLocation, 0);
     }
-    
-    glBindVertexArray(m_vertexArrayID);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    for (const auto& object : objects)
+    for (uint i = 0; i<=10; i++)
     {
-        std::cout << "Rendering object: " << object.identifier << std::endl;
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, cubePositions[i]);
+
+        float angleOfRotation = i * 30;
+
+        model = glm::rotate(model, glm::radians(angleOfRotation), glm::vec3(1.0f, 0.0f, 1.0f));
+
+        glUniformMatrix4fv(modelShaderLocation, 1, GL_FALSE, glm::value_ptr(model));
+
+        glBindVertexArray(m_vertexArrayID);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     glBindVertexArray(0);
     glUseProgram(0);
-
-    glfwSwapBuffers(m_glfwWindowHandle);
 }
 
 void Renderer::setClearColor(float r, float g, float b, float a)

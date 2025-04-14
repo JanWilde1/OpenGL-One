@@ -53,7 +53,7 @@ void Application::init()
         return;
     }
 
-    renderer = new Renderer(*window);
+    renderer = new Renderer();
     renderer->setClearColor(0.5f, 0.1f, 0.1f, 1.0f);
 }
 
@@ -67,6 +67,8 @@ void Application::render()
     std::vector<RenderObject> objects;
 
     renderer->renderFrame(objects);
+
+    glfwSwapBuffers(window->instance);
 }
 
 void Application::cleanup()

@@ -20,10 +20,10 @@ struct RenderObject
 class Renderer
 {
 public:
-    Renderer(Window& window);
+    Renderer();
     ~Renderer();
 
-    bool init();
+    bool initTriangle();
     void shutdown();
 
     void renderFrame(std::vector<RenderObject>& objects);
@@ -35,9 +35,6 @@ private:
 
     bool checkShaderCompileErrors(GLuint shader, const std::string& type);
     bool checkProgramLinkErrors(GLuint program);
-
-    Window& m_window;
-    GLFWwindow* m_glfwWindowHandle; //Sort
 
     GLuint m_shaderProgramID;
     GLuint m_vertexArrayID;
